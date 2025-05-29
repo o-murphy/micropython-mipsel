@@ -25,3 +25,48 @@ jobs:
         ls -la
         ./build-mipsel.sh
 
+    - name: Extract versions and rename files
+      id: extract_versions # Add an ID to this step to reference its outputs
+      run: |
+        # Define the architecture
+        ARCH="mipsel"
+
+        # Extract Micropython version
+        MICROPYTHON_VERSION=$(./build/micropython --version 2>&1 | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+([-.].*)?' || echo "unknown")
+        echo "Micropython Version: $MICROPYTHON_VERSION"
+        MICROPYTHON_FILENAME="micropython-${ARCH}-${MICROPYTHON_VERSION}"
+        mv build/micropython "build/$MICROPYTHON_FILENAME"
+        echo "Renamed build/micropython to build/$MICROPYTHON_FILENAME"
+        echo "micropython_version=$MICROPYTHON_VERSION" >> "$GITHUB_OUTPUT" # Set output for this step
+        echo "micropython_arch=$ARCH" >> "$GITHUB_OUTPUT" # Set output for architecture
+
+        # Extract mpy-cross version
+        MPYCROSS_VERSION=$(./build/mpy-cross --version 2>&1 | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+([-.].*)?' || echo "unknown")
+        echo "mpy-cross Version: $MPYCROSS_VERSION"
+        MPYCROSS_FILENAME="mpy-cross-${ARCH}-${MPYCROSS_VERSION}"
+        mv build/mpy-cross "build/$MPYCROSS_FILENAME"
+        echo "Renamed build/mpy-cross to build/$MPYCROSS_FILENAME"
+        echo "mpycross_version=$MPYCROSS_VERSION" >> "$GITHUB_OUTPUT" # Set output for this step
+        echo "mpycross_arch=$ARCH" >> "$GITHUB_OUTPUT" # Set output for architecture
+
+    - name: Upload Micropython Artifact with Version and Arch
+      uses: actions/upload-artifact@v3
+      with:
+        # Use the outputs from the 'extract_versions' step for artifact name
+        name: micropython-${{ steps.extract_versions.outputs.micropython_arch }}-${{ steps.extract_versions.outputs.micropython_version }}
+        path: build/micropython-* # Wildcard still works as the prefix is consistent
+
+    - name: Upload mpy-cross Artifact with Version and Arch
+      uses: actions/upload-artifact@v3
+      with:
+        # Use the outputs from the 'extract_versions' step for artifact name
+        name: mpy-cross-${{ steps.extract_versions.outputs.mpycross_arch }}-${{ steps.extract_versions.outputs.mpycross_version }}
+        path: build/mpy-cross-* # Wildcard still works as the prefix is consistent
+
+    outputs:
+      # Expose the versions and architectures as job outputs if needed by subsequent jobs
+      micropython_version: ${{ steps.extract_versions.outputs.micropython_version }}
+      micropython_arch: ${{ steps.extract_versions.outputs.micropython_arch }}
+      mpycross_version: ${{ steps.extract_versions.outputs.mpycross_version }}
+      mpycross_arch: ${{ steps.extract_versions.outputs.mpycross_arch }}
+
