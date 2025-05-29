@@ -30,7 +30,7 @@ function ci_unix_build_ffi_lib_helper {
 function ci_unix_qemu_mipsel_setup {
     sudo apt-get update
     sudo apt-get install build-essential git python3 pkg-config libffi-dev
-    sudo apt install autoconf libtool
+    sudo apt-get install autoconf libtool
     sudo apt-get install gcc-mipsel-linux-gnu g++-mipsel-linux-gnu libc6-mipsel-cross
     sudo apt-get install qemu-user
     qemu-mipsel --version
