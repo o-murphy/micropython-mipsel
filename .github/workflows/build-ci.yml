@@ -23,6 +23,6 @@ jobs:
 
     - name: Build
       run: |
-        ls
-        ./build-mipsel
+        ls -la
+        ./build-mipsel.sh
 
