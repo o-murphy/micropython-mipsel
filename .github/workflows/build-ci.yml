@@ -12,11 +12,8 @@ permissions:
 
 jobs:
   build:
-
-    runs-on: ubuntu-latest
-
-    permissions:
-      id-token: write
+    # ubuntu-22.04 is needed for older libffi.
+    runs-on: ubuntu-22.04
 
     steps:
     - uses: actions/checkout@v4
