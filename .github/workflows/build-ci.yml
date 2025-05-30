@@ -34,8 +34,13 @@ jobs:
         # Define the architecture
         ARCH="mipsel"
 
+        # Function to extract version using awk
+        extract_version() {
+          "$1" --version 2>&1 | awk '/MicroPython/ {for (i=2; i<=NF; i++) if ($i ~ /^v[0-9]+\./) {print $i; exit}}' || echo "unknown"
+        }
+
         # Extract Micropython version
-        MICROPYTHON_VERSION=$(./build/micropython --version 2>&1 | grep -oE '\s*v[0-9]+\.[0-9]+\.[0-9]+([-.]\S*)?' || echo "unknown")
+        MICROPYTHON_VERSION=$(extract_version "./build/micropython")
         echo "Micropython Version: $MICROPYTHON_VERSION"
         MICROPYTHON_FILENAME="micropython-${ARCH}-${MICROPYTHON_VERSION}"
         mv build/micropython "build/$MICROPYTHON_FILENAME"
@@ -48,8 +53,7 @@ jobs:
         echo "mpy-cross Version: $MPYCROSS_VERSION"
         MPYCROSS_FILENAME="mpy-cross-${ARCH}-${MPYCROSS_VERSION}"
         mv build/mpy-cross "build/$MPYCROSS_FILENAME"
-        echo "Renamed build/mpy-cross to build/$MPYCROSS_FILENAME"
-        echo "mpycross_version=$MPYCROSS_VERSION" >> "$GITHUB_OUTPUT"
+        echo "Renamed build/mpy-cross to build/$MPYCROSS_VERSION" >> "$GITHUB_OUTPUT"
         echo "mpycross_arch=$ARCH" >> "$GITHUB_OUTPUT"
 
     - name: Upload Micropython Artifact with Version and Arch
