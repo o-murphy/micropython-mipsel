@@ -20,11 +20,12 @@ jobs:
       with:
         submodules: 'true'
 
-    - name: Build
+    - name: Build (static linked)
       run: |
         ls -la
         cd micropython
         git apply ../unix-port-static-build.patch
+        cd ../
         ./build-mipsel.sh
 
     - name: Extract versions and rename files
