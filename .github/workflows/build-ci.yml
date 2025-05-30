@@ -23,6 +23,8 @@ jobs:
     - name: Build
       run: |
         ls -la
+        cd micropython
+        git apply ../unix-port-static-build.patch
         ./build-mipsel.sh
 
     - name: Extract versions and rename files
