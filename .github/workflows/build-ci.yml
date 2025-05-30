@@ -34,22 +34,22 @@ jobs:
         ARCH="mipsel"
 
         # Extract Micropython version
-        MICROPYTHON_VERSION=$(./build/micropython --version 2>&1 | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+([-.].*)?' || echo "unknown")
+        MICROPYTHON_VERSION=$(./build/micropython --version 2>&1 | grep -oE '\s*v[0-9]+\.[0-9]+\.[0-9]+([-.]\S*)?' || echo "unknown")
         echo "Micropython Version: $MICROPYTHON_VERSION"
         MICROPYTHON_FILENAME="micropython-${ARCH}-${MICROPYTHON_VERSION}"
         mv build/micropython "build/$MICROPYTHON_FILENAME"
         echo "Renamed build/micropython to build/$MICROPYTHON_FILENAME"
-        echo "micropython_version=$MICROPYTHON_VERSION" >> "$GITHUB_OUTPUT" # Set output for this step
-        echo "micropython_arch=$ARCH" >> "$GITHUB_OUTPUT" # Set output for architecture
+        echo "micropython_version=$MICROPYTHON_VERSION" >> "$GITHUB_OUTPUT"
+        echo "micropython_arch=$ARCH" >> "$GITHUB_OUTPUT"
 
         # Extract mpy-cross version
-        MPYCROSS_VERSION=$(./build/mpy-cross --version 2>&1 | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+([-.].*)?' || echo "unknown")
+        MPYCROSS_VERSION=$(extract_version "./build/mpy-cross")
         echo "mpy-cross Version: $MPYCROSS_VERSION"
         MPYCROSS_FILENAME="mpy-cross-${ARCH}-${MPYCROSS_VERSION}"
         mv build/mpy-cross "build/$MPYCROSS_FILENAME"
         echo "Renamed build/mpy-cross to build/$MPYCROSS_FILENAME"
-        echo "mpycross_version=$MPYCROSS_VERSION" >> "$GITHUB_OUTPUT" # Set output for this step
-        echo "mpycross_arch=$ARCH" >> "$GITHUB_OUTPUT" # Set output for architecture
+        echo "mpycross_version=$MPYCROSS_VERSION" >> "$GITHUB_OUTPUT"
+        echo "mpycross_arch=$ARCH" >> "$GITHUB_OUTPUT"
 
     - name: Upload Micropython Artifact with Version and Arch
       uses: actions/upload-artifact@v4
