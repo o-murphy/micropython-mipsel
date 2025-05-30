@@ -17,10 +17,10 @@ CI_UNIX_OPTS_QEMU_MIPSEL=(
 
 function ci_unix_build_helper {
     make ${MAKEOPTS} -C mpy-cross
-    make ${MAKEOPTS} -C ports/unix "$@" submodules
-    make ${MAKEOPTS} -C ports/unix "$@" clean
-    make ${MAKEOPTS} -C ports/unix "$@" deplibs
-    make ${MAKEOPTS} -C ports/unix "$@"
+    make ${MAKEOPTS} -C ports/unix -f Makefile.static "$@" submodules
+    make ${MAKEOPTS} -C ports/unix -f Makefile.static "$@" clean
+    make ${MAKEOPTS} -C ports/unix -f Makefile.static "$@" deplibs
+    make ${MAKEOPTS} -C ports/unix -f Makefile.static "$@"
 }
 
 function ci_unix_build_ffi_lib_helper {
