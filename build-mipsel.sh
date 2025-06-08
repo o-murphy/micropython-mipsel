@@ -8,7 +8,7 @@ extract_versions() {
   }
 
   # Extract Micropython version
-  echo "./build/micropython" --version 
+  "./build/micropython" --version 
   MICROPYTHON_VERSION=$(extract_version "./build/micropython")
   echo "Micropython Version: $MICROPYTHON_VERSION"
   MICROPYTHON_FILENAME="micropython-${ARCH}-${MICROPYTHON_VERSION}"
@@ -18,7 +18,7 @@ extract_versions() {
   echo "micropython_arch=$ARCH"
 
   # Extract mpy-cross version
-  echo "./build/mpy-cross" --version 
+  "./build/mpy-cross" --version 
   MPYCROSS_VERSION=$(extract_version "./build/mpy-cross")
   echo "mpy-cross Version: $MPYCROSS_VERSION"
   MPYCROSS_FILENAME="mpy-cross-${ARCH}-${MPYCROSS_VERSION}"
