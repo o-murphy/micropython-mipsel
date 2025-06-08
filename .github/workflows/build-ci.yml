@@ -3,7 +3,6 @@ name: Build
 on:
   release:
     types: [published]
-
   workflow_dispatch:
 
 permissions:
@@ -13,31 +12,88 @@ jobs:
   build:
     # ubuntu-22.04 is needed for older libffi.
     runs-on: ubuntu-22.04
-
     steps:
     - uses: actions/checkout@v4
       with:
         submodules: 'true'
 
     - name: Build Micropython (MIPSEL Static) and Extract Versions
-      id: build_and_extract
+      id: build_and_extract # Keep this ID to get outputs
       run: |
-        ./build-mipsel.sh
+        # Run the build script, capturing its output to a file
+        ./build-mipsel.sh > build_output.txt 2>&1
+        
+        # Capture the version and arch info echoed by build-mipsel.sh
+        # and set them as step outputs for subsequent steps.
+        # This assumes build-mipsel.sh echoes lines like "micropython_version=vX.Y.Z"
+        grep "micropython_version=" build_output.txt >> "$GITHUB_OUTPUT"
+        grep "micropython_arch=" build_output.txt >> "$GITHUB_OUTPUT"
+        grep "mpycross_version=" build_output.txt >> "$GITHUB_OUTPUT"
+        grep "mpycross_arch=" build_output.txt >> "$GITHUB_OUTPUT"
+        
+        echo "--- Full build-mipsel.sh output ---"
+        cat build_output.txt
+        echo "-----------------------------------"
 
-    - name: Upload Micropython Artifact with Version and Arch
+    - name: Verify MicroPython Static Linkage
+      run: |
+        echo "Verifying MicroPython binary linkage..."
+        
+        # Construct the full filenames using outputs from the previous step
+        MICROPYTHON_FILENAME="micropython-${{ steps.build_and_extract.outputs.micropython_arch }}-${{ steps.build_and_extract.outputs.micropython_version }}"
+        MPYCROSS_FILENAME="mpy-cross-${{ steps.build_and_extract.outputs.mpycross_arch }}-${{ steps.build_and_extract.outputs.mpycross_version }}"
+        
+        echo "Checking MicroPython binary: build/$MICROPYTHON_FILENAME"
+        if [ ! -f "build/$MICROPYTHON_FILENAME" ]; then
+          echo "Error: MicroPython binary not found at build/$MICROPYTHON_FILENAME"
+          exit 1
+        fi
+        
+        echo "Running 'file' on micropython:"
+        file "build/$MICROPYTHON_FILENAME"
+        echo "Running 'ldd' on micropython (expected 'not a dynamic executable' for static build):"
+        # ldd will report "not a dynamic executable" for a fully static binary
+        ldd "build/$MICROPYTHON_FILENAME" || true # Use || true to prevent job failure if ldd reports non-dynamic
+        
+        # Heuristic check for static linkage. This is not exhaustive but helps.
+        if ldd "build/$MICROPYTHON_FILENAME" 2>&1 | grep -q "not a dynamic executable"; then
+          echo "MicroPython binary appears to be statically linked. (Confirmed by ldd)"
+        else
+          echo "Warning: MicroPython binary might NOT be fully statically linked. (ldd output indicates dynamic dependencies)"
+          # Optionally, you can uncomment the next line to fail the workflow if static linkage is mandatory
+          # exit 1 
+        fi
+
+        echo "" # Newline for readability
+        echo "Checking mpy-cross binary: build/$MPYCROSS_FILENAME"
+        if [ ! -f "build/$MPYCROSS_FILENAME" ]; then
+          echo "Error: mpy-cross binary not found at build/$MPYCROSS_FILENAME"
+          exit 1
+        fi
+        
+        echo "Running 'file' on mpy-cross:"
+        file "build/$MPYCROSS_FILENAME"
+        echo "Running 'ldd' on mpy-cross (expected 'not a dynamic executable' for static build):"
+        ldd "build/$MPYCROSS_FILENAME" || true # Use || true to prevent job failure if ldd reports non-dynamic
+        
+        if ldd "build/$MPYCROSS_FILENAME" 2>&1 | grep -q "not a dynamic executable"; then
+          echo "mpy-cross binary appears to be statically linked. (Confirmed by ldd)"
+        else
+          echo "Warning: mpy-cross binary might NOT be fully statically linked. (ldd output indicates dynamic dependencies)"
+          # Optionally, you can uncomment the next line to fail the workflow if static linkage is mandatory
+          # exit 1
+        fi
+
+    - name: Upload Micropython Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: micropython-${{ env.micropython_arch }}-${{ env.micropython_version }}
-        path: build/micropython-*
+        name: micropython-${{ steps.build_and_extract.outputs.micropython_arch }}-${{ steps.build_and_extract.outputs.micropython_version }}
+        # The build-mipsel.sh script renames the file in the 'build/' directory
+        path: build/micropython-${{ steps.build_and_extract.outputs.micropython_arch }}-${{ steps.build_and_extract.outputs.micropython_version }}
 
-    - name: Upload mpy-cross Artifact with Version and Arch
+    - name: Upload mpy-cross Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: mpy-cross-${{ env.mpycross_arch }}-${{ env.mpycross_version }}
-        path: build/mpy-cross-*
-
-    outputs:
-      micropython_version: ${{ env.micropython_version }}
-      micropython_arch: ${{ env.micropython_arch }}
-      mpycross_version: ${{ env.mpycross_version }}
-      mpycross_arch: ${{ env.mpycross_arch }}
+        name: mpy-cross-${{ steps.build_and_extract.outputs.mpycross_arch }}-${{ steps.build_and_extract.outputs.mpycross_version }}
+        # The build-mipsel.sh script renames the file in the 'build/' directory
+        path: build/mpy-cross-${{ steps.build_and_extract.outputs.mpycross_arch }}-${{ steps.build_and_extract.outputs.mpycross_version }}
