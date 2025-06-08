@@ -4,6 +4,7 @@ extract_versions() {
 
   # Function to extract Micropython version using awk (try adjusted pattern)
   extract_version() {
+    echo "$1" --version
     "$1" --version 2>&1 | awk '/MicroPython/ {for (i=2; i<=NF; i++) if ($i ~ /^v[0-9]+\./) {print $i; exit}}' || echo "unknown"
   }
 
