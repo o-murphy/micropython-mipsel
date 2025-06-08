@@ -30,6 +30,12 @@ extract_versions() {
 
 cd micropython
 
+echo "DEBUG: Git status in micropython submodule:"
+git status
+echo "DEBUG: Git describe --tags --always --dirty in micropython submodule:"
+git describe --tags --always --dirty
+
+# Setup, build, and run tests
 source ../ci.sh && ci_unix_qemu_mipsel_setup
 source ../ci.sh && ci_unix_qemu_mipsel_build
 source ../ci.sh && ci_unix_qemu_mipsel_run_tests

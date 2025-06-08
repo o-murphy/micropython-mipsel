@@ -16,7 +16,8 @@ jobs:
     - uses: actions/checkout@v4
       with:
         submodules: 'true'
-
+        fetch-depth: 0
+        
     - name: Build Micropython (MIPSEL Static) and Extract Versions
       id: build_and_extract # Keep this ID to get outputs
       run: |
