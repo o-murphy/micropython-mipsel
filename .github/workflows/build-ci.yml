@@ -19,12 +19,6 @@ jobs:
       with:
         submodules: 'true'
 
-    - name: Apply Static Link Patch
-      run: |
-        cd micropython
-        git apply ../unix-port-static-build.patch
-        cd ../
-
     - name: Build Micropython (MIPSEL Static) and Extract Versions
       id: build_and_extract
       run: |

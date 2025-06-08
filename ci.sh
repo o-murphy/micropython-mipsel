@@ -13,14 +13,15 @@ CI_UNIX_OPTS_QEMU_MIPSEL=(
     CROSS_COMPILE=mipsel-linux-gnu-
     VARIANT=coverage
     MICROPY_STANDALONE=1
+    LDFLAGS_EXTRA="-static"
 )
 
 function ci_unix_build_helper {
     make ${MAKEOPTS} -C mpy-cross
-    make ${MAKEOPTS} -C ports/unix -f Makefile.static "$@" submodules
-    make ${MAKEOPTS} -C ports/unix -f Makefile.static "$@" clean
-    make ${MAKEOPTS} -C ports/unix -f Makefile.static "$@" deplibs
-    make ${MAKEOPTS} -C ports/unix -f Makefile.static "$@"
+    make ${MAKEOPTS} -C ports/unix "$@" submodules
+    make ${MAKEOPTS} -C ports/unix "$@" clean
+    make ${MAKEOPTS} -C ports/unix "$@" deplibs
+    make ${MAKEOPTS} -C ports/unix "$@"
 }
 
 function ci_unix_build_ffi_lib_helper {
