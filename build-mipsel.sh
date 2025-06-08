@@ -21,7 +21,7 @@ extract_versions() {
   echo "mpy-cross Version: $MPYCROSS_VERSION"
   MPYCROSS_FILENAME="mpy-cross-${ARCH}-${MPYCROSS_VERSION}"
   mv build/mpy-cross "build/$MPYCROSS_FILENAME"
-  echo "Renamed build/mpy-cross to build/$MPYCROSS_VERSION"
+  echo "Renamed build/mpy-cross to build/$MPYCROSS_FILENAME"
   echo "mpycross_version=$MPYCROSS_VERSION"
   echo "mpycross_arch=$ARCH"
 }
