@@ -13,7 +13,7 @@ jobs:
     # ubuntu-22.04 is needed for older libffi.
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       with:
         submodules: 'true'
         fetch-depth: 0
@@ -86,14 +86,14 @@ jobs:
         fi
 
     - name: Upload Micropython Artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: micropython-${{ steps.build_and_extract.outputs.micropython_arch }}-${{ steps.build_and_extract.outputs.micropython_version }}
         # The build-mipsel.sh script renames the file in the 'build/' directory
         path: build/micropython-${{ steps.build_and_extract.outputs.micropython_arch }}-${{ steps.build_and_extract.outputs.micropython_version }}
 
     - name: Upload mpy-cross Artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: mpy-cross-${{ steps.build_and_extract.outputs.mpycross_arch }}-${{ steps.build_and_extract.outputs.mpycross_version }}
         # The build-mipsel.sh script renames the file in the 'build/' directory
